@@ -1,1 +1,1 @@
-README for Blockchain lecture
+Repository for Blockchain lecture
