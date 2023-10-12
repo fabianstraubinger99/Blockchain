@@ -8,7 +8,7 @@ import static com.company.Main.getNameFromJson;
 public class JsonTest {
 
     @Test
-    void testMe() {
+    void testGoodInput() {
 
         //given
         String input = "{\"name\":\"hendrik\"}";
@@ -21,15 +21,36 @@ public class JsonTest {
     }
 
     @Test
-    void testMe2() {
+    void testBadInput() {
 
         //given
-        String input = "{\"name\":\"hendrik\"}";
-
-        //when
-        String output = getNameFromJson(input);
+        String input = "BAD";
 
         //then
-        Assertions.assertEquals("hendrik", output);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> Main.getNameFromJson(input));
+    }
+
+    @Test
+    void testBadInput2() {
+
+        //given
+        String input = "{\"nams\":\"hendrik\"}";
+
+        //then
+        Assertions.assertThrows(NullPointerException.class,
+                () -> Main.getNameFromJson(input));
+    }
+
+    @Test
+    void testNullInput() {
+
+        //given
+        String input = null;
+
+        //then
+        final NullPointerException ex = Assertions.assertThrows(NullPointerException.class,
+                () -> Main.getNameFromJson(input));
+        Assertions.assertEquals("input must not be null", ex.getMessage());
     }
 }

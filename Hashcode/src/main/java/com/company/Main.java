@@ -24,6 +24,9 @@ public class Main {
     }
 
     public static String getNameFromJson(String json) {
+        if(json == null) {
+            throw new NullPointerException("input must not be null");
+        }
         JsonParser parser = new JsonParser();
         JsonElement element = parser.parse(json);
         logger.info("JSON erfolgreich geparst");
