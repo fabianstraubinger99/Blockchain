@@ -51,7 +51,7 @@ public class JsonTest {
         //then
         final NullPointerException ex = Assertions.assertThrows(NullPointerException.class,
                 () -> Main.getNameFromJson(input));
-        Assertions.assertEquals("input must not be null", ex.getMessage());
+        Assertions.assertEquals("input must not be nulal", ex.getMessage());
     }
 
 }
