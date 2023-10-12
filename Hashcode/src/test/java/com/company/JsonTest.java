@@ -53,4 +53,5 @@ public class JsonTest {
                 () -> Main.getNameFromJson(input));
         Assertions.assertEquals("input must not be null", ex.getMessage());
     }
+
 }
