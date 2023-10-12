@@ -8,7 +8,20 @@ import static com.company.Main.getNameFromJson;
 public class JsonTest {
 
     @Test
-    void test() {
+    void testMe() {
+
+        //given
+        String input = "{\"name\":\"hendrik\"}";
+
+        //when
+        String output = getNameFromJson(input);
+
+        //then
+        Assertions.assertEquals("hendrik", output);
+    }
+
+    @Test
+    void testMe2() {
 
         //given
         String input = "{\"name\":\"hendrik\"}";
