@@ -1,57 +1,109 @@
 package com.company;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+
+import com.hedera.hashgraph.sdk.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.github.cdimascio.dotenv.Dotenv;
 
-import java.util.Scanner;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeoutException;
 
 public class Main {
     private final static Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) {
-        logger.info("Anwendung startet");
+    public static void main(String[] args) throws PrecheckStatusException, TimeoutException, ReceiptStatusException {
 
-        String input = "{\"name\":\"hendrik\"}";
+        //Grab your Hedera Testnet account ID and private key
+        AccountId myAccountId = AccountId.fromString(Dotenv.load().get("MY_ACCOUNT_ID"));
+        PrivateKey myPrivateKey = PrivateKey.fromString(Dotenv.load().get("MY_PRIVATE_KEY"));
 
-        String result = getNameFromJson(input);
+        //Create your Hedera Testnet client
+        Client client = Client.forTestnet();
 
-        System.out.println(result);
+        //Set your account as the client's operator
+        client.setOperator(myAccountId, myPrivateKey);
 
+        //Set the default maximum transaction fee (in Hbar)
+        client.setDefaultMaxTransactionFee(new Hbar(100));
 
-    }
-
-    public static String getNameFromJson(String json) {
-        if(json == null) {
-            throw new NullPointerException("input must not be null");
-        }
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(json);
-        logger.info("JSON erfolgreich geparst");
-        JsonObject object = element.getAsJsonObject();
-        String name = object.get("name").getAsString();
-        logger.info("Name : {}", name);
-        return name;
-    }
+        //Set the maximum payment for queries (in Hbar)
+        client.setMaxQueryPayment(new Hbar(50));
 
 
-    public static void getHashcode() {
-        System.out.print("Gib eine Zahl zum hashen ein: ");
-        Scanner scanner = new Scanner(System.in);
-        long in = scanner.nextLong();
+        //Create the account info query
+        AccountInfoQuery query = new AccountInfoQuery()
+                .setAccountId(myAccountId);
 
-        String input = Long.toString(in);
-        int length = input.length();
+        //Submit the query to a Hedera network
+        AccountInfo accountInfo = query.execute(client);
 
-        int res = 0;
-        for (int i = 0; i < length; i++) {
-            res += Integer.parseInt(String.valueOf(input.charAt(i)));
-        }
+        //Print the account key to the console
+        System.out.println(accountInfo);
 
-        System.out.println(String.format("%8s", res).replace(' ', '0'));
 
+        String object = "60806040526040518060400160405280600b81526020017f48656c6c6f20576f726c640000000000000000000000000000000000000000008152505f908162000049919062000301565b5034801562000056575f80fd5b503360015f6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550620003e5565b5f81519050919050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52604160045260245ffd5b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602260045260245ffd5b5f60028204905060018216806200011957607f821691505b6020821081036200012f576200012e620000d4565b5b50919050565b5f819050815f5260205f209050919050565b5f6020601f8301049050919050565b5f82821b905092915050565b5f60088302620001937fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8262000156565b6200019f868362000156565b95508019841693508086168417925050509392505050565b5f819050919050565b5f819050919050565b5f620001e9620001e3620001dd84620001b7565b620001c0565b620001b7565b9050919050565b5f819050919050565b6200020483620001c9565b6200021c6200021382620001f0565b84845462000162565b825550505050565b5f90565b6200023262000224565b6200023f818484620001f9565b505050565b5b8181101562000266576200025a5f8262000228565b60018101905062000245565b5050565b601f821115620002b5576200027f8162000135565b6200028a8462000147565b810160208510156200029a578190505b620002b2620002a98562000147565b83018262000244565b50505b505050565b5f82821c905092915050565b5f620002d75f1984600802620002ba565b1980831691505092915050565b5f620002f18383620002c6565b9150826002028217905092915050565b6200030c826200009d565b67ffffffffffffffff811115620003285762000327620000a7565b5b62000334825462000101565b620003418282856200026a565b5f60209050601f83116001811462000377575f841562000362578287015190505b6200036e8582620002e4565b865550620003dd565b601f198416620003878662000135565b5f5b82811015620003b05784890151825560018201915060208501945060208101905062000389565b86831015620003d05784890151620003cc601f891682620002c6565b8355505b6001600288020188555050505b505050505050565b61059d80620003f35f395ff3fe608060405234801561000f575f80fd5b506004361061004a575f3560e01c80636cdc3ce31461004e578063893d20e81461006c578063a6f9dae11461008a578063b0f0c96a146100a6575b5f80fd5b6100566100d7565b6040516100639190610303565b60405180910390f35b610074610162565b6040516100819190610362565b60405180910390f35b6100a4600480360381019061009f91906103a9565b61018a565b005b6100c060048036038101906100bb9190610407565b61022a565b6040516100ce929190610441565b60405180910390f35b5f80546100e39061049c565b80601f016020809104026020016040519081016040528092919081815260200182805461010f9061049c565b801561015a5780601f106101315761010080835404028352916020019161015a565b820191905f5260205f20905b81548152906001019060200180831161013d57829003601f168201915b505050505081565b5f60015f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b60015f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16146101e7576101e66104cc565b5b8060015f6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b60605f60028361023a9190610526565b90506040518060400160405280600581526020017f68656c6c6f0000000000000000000000000000000000000000000000000000008152509150915091565b5f81519050919050565b5f82825260208201905092915050565b5f5b838110156102b0578082015181840152602081019050610295565b5f8484015250505050565b5f601f19601f8301169050919050565b5f6102d582610279565b6102df8185610283565b93506102ef818560208601610293565b6102f8816102bb565b840191505092915050565b5f6020820190508181035f83015261031b81846102cb565b905092915050565b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61034c82610323565b9050919050565b61035c81610342565b82525050565b5f6020820190506103755f830184610353565b92915050565b5f80fd5b61038881610342565b8114610392575f80fd5b50565b5f813590506103a38161037f565b92915050565b5f602082840312156103be576103bd61037b565b5b5f6103cb84828501610395565b91505092915050565b5f819050919050565b6103e6816103d4565b81146103f0575f80fd5b50565b5f81359050610401816103dd565b92915050565b5f6020828403121561041c5761041b61037b565b5b5f610429848285016103f3565b91505092915050565b61043b816103d4565b82525050565b5f6040820190508181035f83015261045981856102cb565b90506104686020830184610432565b9392505050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602260045260245ffd5b5f60028204905060018216806104b357607f821691505b6020821081036104c6576104c561046f565b5b50919050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52600160045260245ffd5b7f4e487b71000000000000000000000000000000000000000000000000000000005f52601160045260245ffd5b5f610530826103d4565b915061053b836103d4565b9250828202610549816103d4565b915082820484148315176105605761055f6104f9565b5b509291505056fea2646970667358221220982566bbcf0c2c4a04c37404fc36366fe6c9d43beeaba950d97d802b9efdc4e364736f6c63430008160033";
+        byte[] bytecode = object.getBytes(StandardCharsets.UTF_8);
+
+
+//Create a file on Hedera and store the hex-encoded bytecode
+        FileCreateTransaction fileCreateTx = new FileCreateTransaction()
+                //Set the bytecode of the contract
+                .setContents(bytecode);
+
+//Submit the file to the Hedera test network signing with the transaction fee payer key specified with the client
+        TransactionResponse submitTx = fileCreateTx.execute(client);
+
+//Get the receipt of the file create transaction
+        TransactionReceipt fileReceipt = submitTx.getReceipt(client);
+
+//Get the file ID from the receipt
+        FileId bytecodeFileId = fileReceipt.fileId;
+
+//Log the file ID
+        System.out.println("The smart contract bytecode file ID is " + bytecodeFileId);
+// 0.0.7496800
+
+        ContractCreateTransaction contractTx = new ContractCreateTransaction()
+                //Set the file ID of the Hedera file storing the bytecode
+                .setBytecodeFileId(bytecodeFileId)
+                //Set the gas to instantiate the contract
+                .setGas(800_000)
+                //Provide the constructor parameters for the contract
+                .setConstructorParameters(new ContractFunctionParameters().addString("Hello from Hedera!"));
+
+//Submit the transaction to the Hedera test network
+        TransactionResponse contractResponse = contractTx.execute(client);
+
+//Get the receipt of the file create transaction
+        TransactionReceipt contractReceipt = contractResponse.getReceipt(client);
+
+//Get the smart contract ID
+        ContractId newContractId = contractReceipt.contractId;
+        //bytecode file id: 0.0.7496995
+//0.0.7496997
+//Log the smart contract ID
+        System.out.println("The smart contract ID is " + newContractId);
+
+
+/*
+        ContractCreateFlow contractCreate = new ContractCreateFlow()
+                .setBytecode(bytecode)
+                .setGas(800_000);
+
+//Sign the transaction with the client operator key and submit to a Hedera network
+
+        TransactionResponse txResponse = contractCreate.execute(client);
+
+//Get the receipt of the transaction
+        TransactionReceipt receipt = txResponse.getReceipt(client);
+
+//Get the new contract ID
+        ContractId newContractId = receipt.contractId;
+
+        System.out.println("The new contract ID is " +newContractId);
+
+    */
     }
 
 
