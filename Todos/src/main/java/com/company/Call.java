@@ -36,7 +36,7 @@ public class Call {
         //Print the account key to the console
         System.out.println(accountInfo);
 //0.0.7496997
-        ContractId contractId = ContractId.fromString("0.0.7496997");
+        ContractId contractId = ContractId.fromString("0.0.7508206");
         // Calls a function of the smart contract
         ContractCallQuery contractQuery = new ContractCallQuery()
                 //Set the gas for the query
@@ -45,7 +45,7 @@ public class Call {
 
                 .setContractId(contractId)
                 //Set the function of the contract to call
-                .setFunction("getOwner")
+                .setFunction("print")
                 //Set the query payment for the node returning the request
                 //This value must cover the cost of the request otherwise will fail
                 .setQueryPayment(new Hbar(2));
@@ -53,7 +53,7 @@ public class Call {
         //Submit to a Hedera network
         ContractFunctionResult getMessage = contractQuery.execute(client);
         //Get the message
-        String message = getMessage.getAddress(0);
+        String message = getMessage.getString(0);
 
 //Log the message
         System.out.println("The contract message: " + message);
